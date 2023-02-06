@@ -1,0 +1,597 @@
+import 'package:flutter/material.dart';
+import 'dart:ui';
+import 'dart:math';
+import 'package:provider/provider.dart';
+import 'package:paychalet/AppLocalizations.dart';
+import 'package:paychalet/colors.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+//import 'package:grouped_list/grouped_list.dart';
+import 'package:paychalet/Payments/PaymentClass.dart';
+import "package:collection/collection.dart";
+
+class PaysMainSummaryfrom extends StatefulWidget {
+  @override
+  _PaysMainSummaryfromState createState() => _PaysMainSummaryfromState();
+}
+
+const CURVE_HEIGHT = 160.0;
+const AVATAR_RADIUS = CURVE_HEIGHT * 0.28;
+const AVATAR_DIAMETER = AVATAR_RADIUS * 2;
+Color colorOne = Colors.amber;
+Color colorTwo = Colors.amber[300];
+Color colorThree = Colors.amber[100];
+
+List PaymentsCat = [];
+List Paymentsfrom = [];
+
+
+
+List paymentsgroup = [
+  {
+    "Payment_total": "7.0",
+    "Payment_from": "7.0",
+    "Payment_cat": "Weman Dress",
+  }
+];
+
+
+List paymentstotal = [
+  {
+    "Payment_total": 7.0,
+    "Payment_from": "7.0",
+  }
+];
+
+
+List <PaymentsClass>paymentslist =[];
+
+//= [
+//  {
+//    "Payment_id": "Weman Dress",
+//    "Payment_name": "Weman Dress",
+//    "Payment_desc": "Weman Dress",
+//    "Payment_amt": "7.0",
+//    "Payment_currency": "7.0",
+//    "Payment_modify_date": "Weman Dress",
+//    "Payment_entry_date": "Weman Dress",
+//    "Payment_Fav": 'True',
+//    "Payment_cat": "Weman Dress",
+//    "Payment_img":
+//    'https://firebasestorage.googleapis.com/v0/b/fir-3af1c.appspot.com/o/t-shirt.jpg?alt=media&token=18e2c978-8386-4aaa-880c-dc8d0a5252eb',
+//  }
+//];
+
+class _PaysMainSummaryfromState extends State<PaysMainSummaryfrom> {
+  printlist() {
+    if (cars != null) {
+      paymentslist=[];
+      PaymentsCat.clear();
+      Paymentsfrom.clear();
+
+      for (var i = 0; i < cars.docs.length; i++) {
+       // print('cat from data base${cars.docs[i].data()['Payment_cat']}');
+        PaymentsCat.add(cars.docs[i].data()['Payment_cat']);
+        Paymentsfrom.add( cars.docs[i].data()['Payment_from'].toString());
+        PaymentsClass paymentsone =PaymentsClass();
+        paymentsone.Payment_id= int.parse(cars.docs[i].data()['Payment_id']);
+        paymentsone.Payment_name= cars.docs[i].data()['Payment_name'];
+        paymentsone.Payment_desc= cars.docs[i].data()['Payment_desc'];
+        paymentsone.Payment_amt= double.parse(cars.docs[i].data()['Payment_amt']);
+        paymentsone.Payment_Fav= cars.docs[i].data()['rod_fav'].toString();
+        paymentsone.Payment_cat=cars.docs[i].data()['Payment_cat'];
+        paymentsone.Payment_currency= cars.docs[i].data()['Payment_currency'];
+        paymentsone.Payment_entry_date= cars.docs[i].data()['Payment_entry_date'].toDate();
+        paymentsone.Payment_modify_date= cars.docs[i].data()['Payment_modify_date'].toDate();
+        paymentsone.Payment_img=cars.docs[i].data()['Payment_img'];
+        paymentsone.Payment_to=  cars.docs[i].data()['Payment_to'];
+        paymentsone.Payment_doc_id= cars.docs[i].id;
+        paymentsone.Payment_from=cars.docs[i].data()['Payment_from'];
+        paymentslist.add(paymentsone);
+      }
+
+      PaymentsCat = Set.of(PaymentsCat).toList();
+      Paymentsfrom = Set.of(Paymentsfrom).toList();
+
+      double temp_amt_do = 0;
+      paymentsgroup.clear();
+      paymentstotal.clear();
+     // print('length====');
+     // print(Paymentsfrom.length);
+     // print(PaymentsCat.length);
+     // print(paymentslist.length);
+
+
+      for (int i = 0; i < Paymentsfrom.length; i++) {
+ // print(Paymentsfrom[i]);
+
+         for (int c = 0; c < PaymentsCat.length; c++) {
+           temp_amt_do = 0.0;
+ // print('rrrrr=${PaymentsCat[c]}');
+           for (int j = 0; j < paymentslist.length; j++) {
+
+             if (paymentslist[j].Payment_from == Paymentsfrom[i]
+             && paymentslist[j].Payment_cat==PaymentsCat[c])
+             {
+            // print('from${paymentslist[j].Payment_from }');
+            // print('cat=${paymentslist[j].Payment_cat}');
+            // print('Paymentsfrom[i]=${Paymentsfrom[i]}');
+            // print('PaymentsCat[c]=${PaymentsCat[c]}');
+             // print('inside iffffffff=${paymentslist[j].Payment_amt}');
+              setState(() {
+                var temp=paymentslist[j].Payment_amt>0 ?paymentslist[j].Payment_amt :0;
+                temp_amt_do = temp_amt_do + temp;
+              });
+
+
+             }
+           }
+
+
+           setState(() {
+             if (temp_amt_do>0)
+             {
+             paymentsgroup.add({
+               "Payment_cat": PaymentsCat[c],
+               "Payment_from": Paymentsfrom[i],
+               "Payment_total": temp_amt_do,
+             });
+             }
+           });
+
+
+
+
+
+         }
+         }
+
+
+      paymentsgroup.sort(
+              (a, b) => a['Payment_cat'].compareTo(b['Payment_cat']));
+
+
+
+                 for (int i =0 ;i<Paymentsfrom.length;i++)
+             {
+               double temp_total=0.0;
+               for (int j =0 ;j<paymentsgroup.length;j++)
+               {
+
+                 if(Paymentsfrom[i]==paymentsgroup[j]['Payment_from'])
+                   {
+                     temp_total=temp_total+paymentsgroup[j]['Payment_total'];
+                   }
+
+
+               }
+
+               setState(() {
+                 if (temp_total>0)
+                 {
+                   paymentstotal.add({
+                     "Payment_from": Paymentsfrom[i],
+                     "Payment_total": temp_total.toString(),
+                   });
+                 }
+               });
+
+             }
+
+
+    } else {
+     // print("error");
+    }
+
+    // gettypetotalprice();
+  }
+
+  Future<User> getUser() async {
+    final FirebaseAuth _auth = FirebaseAuth.instance;
+    return await _auth.currentUser;
+  }
+
+  //get payment
+  getData() async {
+    return await FirebaseFirestore.instance
+        .collection('Payments')
+        .where("Payment_user",isEqualTo: Username.toString())
+        .get();
+  }
+
+
+
+
+  call_get_data() {
+    getData().then((results) {
+      setState(() {
+        cars = results;
+
+        printlist();
+      });
+    });
+  }
+
+  String Username;
+
+  QuerySnapshot cars;
+  QuerySnapshot carsgroups;
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+
+
+    getUser().then((user) {
+      if (user != null) {
+        setState(() {
+          Username = user.email;
+         // print('Username0= ${Username}');
+          call_get_data();
+         // paymentslist.removeAt(0);
+        });
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    super.dispose();
+    paymentslist.clear();
+  }
+  @override
+  final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
+  // Color pyellow = Color(Colors.amber);
+
+  Widget build(BuildContext context) {
+    var pheight = MediaQuery.of(context).size.height;
+    var pwidth = MediaQuery.of(context).size.width;
+
+    var appLanguage = Provider.of<AppLanguage>(context);
+
+    return Scaffold(
+      key: _scaffoldKey,
+      // drawer: Appdrawer(),
+      body: GestureDetector(
+        onTap: () {
+         // print('ontap');
+          FocusScopeNode currentFocus = FocusScope.of(context);
+
+          if (!currentFocus.hasPrimaryFocus) {
+            currentFocus.unfocus();
+          }
+        },
+        child: Stack(
+          children: <Widget>[
+            //header shape
+            Positioned(
+              top: 0,
+              left: 0,
+              child: Container(
+                height: MediaQuery.of(context).size.height / 4,
+                width: MediaQuery.of(context).size.width,
+                decoration: BoxDecoration(
+                  //borderRadius: BorderRadius.circular(200),
+                  //  color: Colors.amber,
+                ),
+                child: CustomPaint(
+                  child: Container(
+                    height: 400.0,
+                  ),
+                  painter: _MyPainter(),
+                ),
+              ),
+            ),
+//summary
+            Positioned(
+              bottom: 0,
+              left: 0,
+              child: Container(
+                  height: MediaQuery.of(context).size.height / 6,
+                  width: MediaQuery.of(context).size.width,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(20),
+                    //  color: Red_deep2,
+                  ),
+                  child:Card(
+                      color: Red_deep2,
+                      clipBehavior: Clip.antiAlias,
+                      elevation: 0.0,
+                      shape:
+                      RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
+                      child:
+                      Padding(
+                        padding: const EdgeInsets.only(left:20.0,right:20,top:15),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: paymentstotal.map((e) =>
+
+                          //   Text(e['Payment_total']),
+                          Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children:
+                              [
+                                Text(e['Payment_from'],
+
+
+                                  style: TextStyle(
+                                      fontFamily: 'Montserrat',
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 20.0),),
+                                SizedBox(width: 20,),
+
+                                Text(e['Payment_total'].toString(),
+                                  style: TextStyle(
+                                      fontFamily: 'Montserrat',
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 20.0),),
+
+
+                              ]
+                          )
+                          ).toList(),
+
+
+
+//                            Text('Walid:',
+//                      style: TextStyle(
+//                      fontFamily: 'Montserrat',
+//                          fontWeight: FontWeight.bold,
+//                          fontSize: 20.0),),
+//                            SizedBox(height: 5,),
+//                            Text('Emad:',
+//                              style: TextStyle(
+//                                  fontFamily: 'Montserrat',
+//                                  fontWeight: FontWeight.bold,
+//                                  fontSize: 20.0),)
+
+//                        "Payment_total": "7.0",
+//                        "Payment_from": "7.0",
+
+
+                        ),
+                      )
+                  )
+              ),
+            ),
+
+
+          /*  Positioned(
+              top: 100,
+              left: 115,
+              child: Container(
+                height: 350, //MediaQuery.of(context).size.height / 4,
+                width: 350, //MediaQuery.of(context).size.width,
+                decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(200),
+                    color: Colors.amber),
+              ),
+            ),
+            */
+            //a
+            Positioned(
+              bottom: -125,
+              left: -150,
+              child: Container(
+                height: 250, //MediaQuery.of(context).size.height / 4,
+                width: 250, //MediaQuery.of(context).size.width,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(250),
+                  color: Red_deep3,
+                ),
+              ),
+            ),
+            Positioned(
+              bottom: -100,
+              right: -115,
+              child: Container(
+                height: 250, //MediaQuery.of(context).size.height / 4,
+                width: 250, //MediaQuery.of(context).size.width,
+                decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(200), color: Red_deep2),
+              ),
+            ),
+            //menu
+            Positioned(
+              top: pheight / 25,
+              left: pwidth / 20,
+              child: IconButton(
+                icon: Icon(Icons.menu),
+                onPressed: () {
+                 // print('inside button');
+                  // _scaffoldKey.currentState.openDrawer();
+                 // call_get_data();
+                 Navigator.pushReplacementNamed(context, "/main_page");
+                },
+              ),
+            ),
+            Positioned(
+              top: pheight / 25,
+              right: pwidth / 20,
+              child: IconButton(
+                icon: Icon(Icons.arrow_back),
+                onPressed: () {
+                 // print('inside button');
+                  // FirebaseAuth.instance.signOut();
+                  Navigator.pop(context);
+                  //  Navigator.popAndPushNamed(context, "/SignIn");
+
+                  //Navigator.pushReplacementNamed(context, "/SignIn");
+                },
+              ),
+            ),
+            //body
+            Positioned(
+              top: pheight / 8,
+              right: 0,
+              bottom:  MediaQuery.of(context).size.height / 6,
+              child: Container(
+                width: MediaQuery.of(context).size.width,
+                height: MediaQuery.of(context).size.height >= 775.0
+                    ? MediaQuery.of(context).size.height
+                    : 775.0,
+
+                child:
+                GridView.builder(
+                    itemCount: paymentsgroup.length,
+                    gridDelegate: new SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount:3
+                    ),
+                    itemBuilder: (BuildContext context,int index){
+                      return  _build_summary(
+                        Payment_cat: paymentsgroup[index]['Payment_cat'],
+                        Payment_from: paymentsgroup[index]['Payment_from'],
+                        Payment_total: paymentsgroup[index]['Payment_total'].toString(),
+                      );
+                    }
+
+                ),
+
+              ),
+            ),
+            //header title
+            Positioned(
+              top: MediaQuery.of(context).size.height / 18,
+              left: MediaQuery.of(context).size.width / 2 - 50,
+              child: Text(
+                AppLocalizations.of(context).translate('Details'),
+                style: TextStyle(fontSize: 29, fontWeight: FontWeight.bold),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _build_summary extends StatelessWidget {
+  final String Payment_cat;
+  final String Payment_from;
+  final String Payment_total;
+  _build_summary({
+    this.Payment_cat,
+    this.Payment_from,
+    this.Payment_total,
+  });
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      clipBehavior: Clip.antiAlias,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.0)),
+      child: Hero(
+        tag: new Text("Hero1") //productname
+        ,
+        child: Material(
+          child: InkWell(
+            onTap: () {
+              // // print('${cat_date}');
+//          Navigator.of(context).push(
+//            new MaterialPageRoute(
+//                builder:  (BuildContext context) => new categorysdetails(
+//
+//                  cat_id:cat_id,
+//                  cat_name: cat_name,
+//                  cat_desc:cat_desc ,
+//                  cat_img:cat_img ,
+//                  cat_remark:cat_remark ,
+//                  cat_date: cat_date,
+//                  cat_doc_id: cat_doc_id,
+//
+//
+//                )
+//            ),
+//          );
+            },
+            child: GridTile(
+              header: Center(
+                  child: Container(
+                    color: Colors.black12,
+                    child: Text(
+                      '${Payment_cat}',
+                      style:
+                      TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
+                    ),
+                  )),
+
+              footer: Container(
+                  color: Colors.white70,
+                  child: new Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
+                      Expanded(
+                        child: Padding(
+                          padding: const EdgeInsets.only(left: 20.0),
+                          child: Center(
+                              child: new Text(
+                                Payment_from,
+                                style: TextStyle(
+                                    fontWeight: FontWeight.bold, fontSize: 16.0),
+                              )),
+                        ),
+                      ),
+                    ],
+                  )
+
+                /*  ListTile(
+                     leading: Text(productname , style: TextStyle(fontWeight: FontWeight.bold),
+
+                     ),
+                     title: Text("\$$prodprice",style: TextStyle(color: Colors.red,fontWeight:FontWeight.w800),),
+                       subtitle: Text("\$$prodoldprice",style: TextStyle(color: Colors.red,fontWeight:FontWeight.w800,
+                                                                       decoration: TextDecoration.lineThrough),),
+
+                       ),
+                */
+
+              ),
+              // child: Image.asset(prodpicture,fit: BoxFit.cover,),
+              child: Center(
+                  child: Text(
+                    "${Payment_total}",
+                    style:
+                    TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
+                  )),
+              //Image.network(cat_img,fit: BoxFit.cover,),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _MyPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    var paint = Paint();
+    paint.color = Red_deep;
+    paint.style = PaintingStyle.fill; // Change this to fill
+
+    var path = Path();
+
+    path.moveTo(0, size.height * 0.5);
+    path.quadraticBezierTo(
+        size.width / 2, size.height / 1, size.width, size.height * 0.4);
+    path.lineTo(size.width, 0);
+    path.lineTo(0, 0);
+
+    canvas.drawPath(path, paint);
+  }
+
+  @override
+  bool shouldRepaint(CustomPainter oldDelegate) {
+    return true;
+  }
+}
+
+
+//class payment_from_class
+//{
+//  String Payments_from;
+//  double Payments_fromtal;
+//  payment_from_class( {this.Payments_from,this.Payments_fromtal});
+//
+//}

@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "249273816356",
+    "firebase_url": "https://projectprojectphpadmindbonen.firebaseio.com",
+    "project_id": "projectprojectphpadmindbonen",
+    "storage_bucket": "projectprojectphpadmindbonen.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:249273816356:android:0731f304f9f7015f0d8fb1",
+        "android_client_info": {
+          "package_name": "com.example.paychalet"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "249273816356-q9hh9ddo4s8k21jbrcsnf4s8e0q3u5ch.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAURK838Po9jP4-wO3p_37cN3s6D3vlHf4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "249273816356-q9hh9ddo4s8k21jbrcsnf4s8e0q3u5ch.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "249273816356-6d3u00kbi6k91nc1qq516g1q4erh3tli.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.paychalet"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
